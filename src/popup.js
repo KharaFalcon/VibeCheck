@@ -3,42 +3,21 @@
 This js file analyzes the text and shows human-written advice
 */
 
-// Database of keywords (TO EXPAND!!)
-const emotionKeywords = {
-  angry: ['horrible', 'hate', 'angry', 'despicable', 'annoying'],
-  happy: ['happy', 'fun', 'excited', 'love'],
-  sad: ['sad', 'depressed', 'cry', 'alone', 'isolated'],
-};
-
-// This function categorises the tone of the highlighted text
-// by detecting the emotion of certain words - we use the emotionKeywords database here
-// to figure out the emotion
-function detectEmotion(text) {
-  // Converting the text to lowercase for easier looping and detecting
+// Function to detect emotion (can be expanded to use fetched keywords)
+function detectEmotion(text, keywordsData) {
   text = text.toLowerCase();
-
-  // Loop through each emotion (angry, sad, happy)
-  for (const [emotion, keywords] of Object.entries(emotionKeywords)) {
-    // Check if any keyword exists in the highlighted text
-    if (keywords.some((word) => text.includes(word))) {
-      return emotion;
+  for (const entry of keywordsData) {
+    if (entry.keywords.some((word) => text.includes(word))) {
+      return entry.emotion;
     }
   }
-  // This is the default if no keywords match to any word in the highlighted text
   return 'neutral';
 }
 
-// Mock database of human suggestions (NEED TO BE REPLACED BY Firebase!!)
-function humanRewrite(emotion) {
-  const suggestions = {
-    angry: [
-      "Try: 'I feel frustrated because...'",
-      "Reword: 'Let's find a solution together.'",
-    ],
-    sad: ["It's okay to say: 'I've been feeling down about...'"],
-  };
-  // Return the first suggestion for the detected emotion (or a default)
-  return suggestions[emotion]?.[0] || 'Sounds good to send!';
+// Function to get human rewrite from fetched data
+function getRewriteSuggestion(emotion, suggestionsData) {
+  const suggestionEntry = suggestionsData.find((s) => s.emotion === emotion);
+  return suggestionEntry ? suggestionEntry.suggestion : 'Sounds good to send!';
 }
 
 // When the "Check Emotional Tone" button is clicked:
@@ -49,35 +28,49 @@ document.getElementById('checkText').addEventListener('click', () => {
     chrome.scripting.executeScript(
       {
         // Target the active tab
-        // tabs[0] refers to the first and only active tab
         target: { tabId: tabs[0].id },
-
-        // Function to run in the tab
         func: () => window.getSelection().toString().trim(),
-
-        // Analysis taking place
       },
       (results) => {
-        // Get the selected text
-        const text = results[0].result;
+        const selectedText = results[0].result;
 
-        // Detect emotion (e.g., "angry")
-        const emotion = detectEmotion(text);
-
-        // Get human rewrite
-        const suggestion = humanRewrite(emotion);
-        // Display the suggestion in the popup
-        document.getElementById('suggestion').textContent = suggestion;
+        if (selectedText) {
+          // Request rewrite suggestions from the background script
+          chrome.runtime.sendMessage(
+            { action: 'getRewriteSuggestions' },
+            (response) => {
+              if (response.success) {
+                const suggestionsData = response.data;
+                // Assuming your Firebase data has 'emotion' and 'suggestion' fields
+                const emotion = detectEmotion(selectedText, suggestionsData); // Pass suggestionsData to detectEmotion
+                const suggestion = getRewriteSuggestion(
+                  emotion,
+                  suggestionsData
+                );
+                document.getElementById('suggestion').textContent = suggestion;
+              } else {
+                console.error(
+                  'Failed to fetch rewrite suggestions:',
+                  response.error
+                );
+                document.getElementById('suggestion').textContent =
+                  'Error fetching suggestions.';
+              }
+            }
+          );
+        } else {
+          document.getElementById('suggestion').textContent =
+            'Please select some text to check.';
+        }
       }
     );
   });
 });
 
-// --- NEW CODE FOR TOGGLE FUNCTIONALITY ---
+// --- NEW CODE FOR TOGGLE FUNCTIONALITY (Keep as is) ---
 
 const toggleSwitch = document.getElementById('toggle');
 
-// Function to load the saved state of the toggle
 async function loadToggleState() {
   try {
     const response = await chrome.runtime.sendMessage({
@@ -86,20 +79,17 @@ async function loadToggleState() {
     });
     if (response.success && response.value !== undefined) {
       toggleSwitch.checked = response.value;
-      console.log('Loaded toggle state:', response.value); // Log for debugging
+      console.log('Loaded toggle state:', response.value);
     } else {
-      // Default to enabled if no setting found
       toggleSwitch.checked = true;
-      console.log('No saved toggle state found, defaulting to enabled.'); // Log for debugging
+      console.log('No saved toggle state found, defaulting to enabled.');
     }
   } catch (error) {
     console.error('Error loading toggle state:', error);
-    // Fallback to default in case of error
     toggleSwitch.checked = true;
   }
 }
 
-// Function to save the new state of the toggle
 async function saveToggleState(isEnabled) {
   try {
     const response = await chrome.runtime.sendMessage({
@@ -108,7 +98,7 @@ async function saveToggleState(isEnabled) {
       value: isEnabled,
     });
     if (response.success) {
-      console.log('Saved toggle state:', isEnabled); // Log for debugging
+      console.log('Saved toggle state:', isEnabled);
     } else {
       console.error('Error saving toggle state:', response.error);
     }
@@ -117,10 +107,8 @@ async function saveToggleState(isEnabled) {
   }
 }
 
-// Add an event listener to the toggle switch
 toggleSwitch.addEventListener('change', (event) => {
   saveToggleState(event.target.checked);
 });
 
-// Load the state when the popup is opened
 document.addEventListener('DOMContentLoaded', loadToggleState);
