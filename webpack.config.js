@@ -7,13 +7,11 @@ const Dotenv = require('dotenv-webpack');
 module.exports = {
   // Set mode to 'development' or 'production'
   mode: 'development', // For hackathon, 'development' is fine. Use 'production' for final build.
-  // Entry points for your different extension parts
   entry: {
-    // CORRECTED: Entry points now assume files are inside 'src/'
     background: './src/background.js',
     content: './src/content.js',
     popup: './src/popup.js',
-    // You can add more entry points for options page, etc.
+
   },
   output: {
     path: path.resolve(__dirname, 'dist'), // All bundled files go into a 'dist' folder
