@@ -1,3 +1,4 @@
+// popup.js
 /*
 This js file analyzes the text and shows human-written advice
 */
@@ -71,3 +72,55 @@ document.getElementById('checkText').addEventListener('click', () => {
     );
   });
 });
+
+// --- NEW CODE FOR TOGGLE FUNCTIONALITY ---
+
+const toggleSwitch = document.getElementById('toggle');
+
+// Function to load the saved state of the toggle
+async function loadToggleState() {
+  try {
+    const response = await chrome.runtime.sendMessage({
+      action: 'getSetting',
+      key: 'vibeCheckEnabled',
+    });
+    if (response.success && response.value !== undefined) {
+      toggleSwitch.checked = response.value;
+      console.log('Loaded toggle state:', response.value); // Log for debugging
+    } else {
+      // Default to enabled if no setting found
+      toggleSwitch.checked = true;
+      console.log('No saved toggle state found, defaulting to enabled.'); // Log for debugging
+    }
+  } catch (error) {
+    console.error('Error loading toggle state:', error);
+    // Fallback to default in case of error
+    toggleSwitch.checked = true;
+  }
+}
+
+// Function to save the new state of the toggle
+async function saveToggleState(isEnabled) {
+  try {
+    const response = await chrome.runtime.sendMessage({
+      action: 'saveSetting',
+      key: 'vibeCheckEnabled',
+      value: isEnabled,
+    });
+    if (response.success) {
+      console.log('Saved toggle state:', isEnabled); // Log for debugging
+    } else {
+      console.error('Error saving toggle state:', response.error);
+    }
+  } catch (error) {
+    console.error('Error saving toggle state (communication issue):', error);
+  }
+}
+
+// Add an event listener to the toggle switch
+toggleSwitch.addEventListener('change', (event) => {
+  saveToggleState(event.target.checked);
+});
+
+// Load the state when the popup is opened
+document.addEventListener('DOMContentLoaded', loadToggleState);
