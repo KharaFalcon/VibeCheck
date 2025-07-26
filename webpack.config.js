@@ -1,18 +1,18 @@
-
 // webpack.config.js
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const Dotenv = require('dotenv-webpack'); // Keep this line
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   // Set mode to 'development' or 'production'
   mode: 'development', // For hackathon, 'development' is fine. Use 'production' for final build.
   // Entry points for your different extension parts
   entry: {
-    background: './background.js',
-    content: './content.js',
-    popup: './popup.js',
+    // CORRECTED: Entry points now assume files are inside 'src/'
+    background: './src/background.js',
+    content: './src/content.js',
+    popup: './src/popup.js',
     // You can add more entry points for options page, etc.
   },
   output: {
@@ -38,20 +38,21 @@ module.exports = {
     ],
   },
   plugins: [
-    // Copy manifest.json and icons to the dist folder
+    // Copy manifest.json (assuming it stays in the root)
     new CopyPlugin({
       patterns: [
         { from: 'manifest.json', to: 'manifest.json' },
-        { from: 'icons', to: 'icons' }, // Assuming your icons are in an 'icons' folder
-        // If sentiment-analyzer.js is still a standalone file not imported directly, copy it
-        { from: 'sentiment-analyzer.js', to: 'sentiment-analyzer.js' },
+        // If you want to include icons and sentiment-analyzer.js,
+        // make sure they are in src/ and uncomment these lines:
+        // { from: 'src/icons', to: 'icons' },
+        // { from: 'src/sentiment-analyzer.js', to: 'sentiment-analyzer.js' },
         // If you still want a local rewrite-data.js fallback, copy it too
-        // { from: 'rewrite-data-local-fallback.js', to: 'rewrite-data-local-fallback.js' },
+        // { from: 'src/rewrite-data-local-fallback.js', to: 'rewrite-data-local-fallback.js' },
       ],
     }),
     // Generate popup.html from your source popup.html
     new HtmlWebpackPlugin({
-      template: './popup.html',
+      template: './src/popup.html', // CORRECTED: Path to popup.html inside src/
       filename: 'popup.html',
       chunks: ['popup'], // This ensures only popup.bundle.js is injected into popup.html
     }),
