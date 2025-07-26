@@ -1,0 +1,2 @@
+document.addEventListener("mouseup",function(){var e,t=window.getSelection().toString().trim();t&&("TEXTAREA"===(e=document.activeElement).tagName||"textbox"===e.getAttribute("role"))&&chrome.runtime.sendMessage({text:t})});
+//# sourceMappingURL=content.bundle.js.map
