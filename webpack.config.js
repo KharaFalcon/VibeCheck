@@ -1,7 +1,9 @@
+
 // webpack.config.js
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const Dotenv = require('dotenv-webpack'); // Keep this line
 
 module.exports = {
   // Set mode to 'development' or 'production'
@@ -53,6 +55,8 @@ module.exports = {
       filename: 'popup.html',
       chunks: ['popup'], // This ensures only popup.bundle.js is injected into popup.html
     }),
+    // Add Dotenv plugin here to load environment variables from .env file
+    new Dotenv(),
   ],
   devtool: 'cheap-module-source-map', // Easier debugging in development
   // IMPORTANT for Manifest V3 service worker (background.js)

@@ -19,6 +19,7 @@
     "babel-loader": "^9.x.x",
     "copy-webpack-plugin": "^12.x.x",
     "css-loader": "^6.x.x",
+    "dotenv-webpack": "^8.1.1",
     "html-webpack-plugin": "^5.x.x",
     "style-loader": "^3.x.x",
     "webpack": "^5.x.x",
