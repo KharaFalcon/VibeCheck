@@ -1,4 +1,7 @@
 
+![Logo](src/images/logo.png)
+
+
 # VibeCheck
 
 VibeCheck is an innovative browser extension designed to act as your personal communication coach. It analyzes your draft messages and emails in real-time through an "emotional lens," identifying keywords and phrases that might convey an unintended harsh or overly emotional tone.
@@ -36,3 +39,11 @@ VibeCheck leverages a modern web stack to deliver a fast, secure, and user-frien
 Once installed, VibeCheck will automatically activate when you are composing messages or emails in supported web applications (e.g., Gmail, Outlook web version). As you type, the extension will provide discreet suggestions directly within your drafting area.
 
 Look for highlighted text or a small indicator near phrases that might be perceived as overly emotional. Clicking on these indicators will reveal alternative, more empathetic phrasings that you can choose to use.
+## Screenshots
+
+![App Screenshot](src/images/exampleExtension.png)
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
